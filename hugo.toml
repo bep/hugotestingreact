@@ -26,6 +26,15 @@ disableKinds = ['taxonomy', 'term', "page", "section", "sitemap"]
 [[build.cachebusters]]
     source = "(postcss|tailwind)\\.config\\.js"
     target = "css"
+[[build.cachebusters]]
+    source = "layouts/.*"
+    target = "js"
+[[build.cachebusters]]
+    source = "md"
+    target = "js"
+[[build.cachebusters]]
+    source = "js"
+    target = "js"
 
 [markup]
     [markup.highlight]

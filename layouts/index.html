@@ -1,11 +1,47 @@
 {{ define "main" }}
-  <article class="mx-auto max-w-[90ch] bg-green-50 p-2 md:p-6 rounded-lg">
-    <h1 class="text-3xl mb-4 tracking-tight text-black font-bold uppercase">
-      {{ .Title }}
-    </h1>
+  {{ $bundle := (js.Bundle "mybundle" $.Store) }}
 
-    <div class="markdown">
-      {{ .Content }}
+
+  <div class="mx-auto max-w-[90ch] markdown">
+    <h2 class="mb-4">Content!</h2>
+    <div class="bg-gray-black p-2">{{ .Content }}</div>
+    <h2 class="my-4">Headless UI</h2>
+    <div class="grid grid-cols-3 gap-2">
+      {{ with $bundle.UseScriptMany "reactbatch" }}
+        {{ if not .GetCallback }}
+          {{ .SetCallback (resources.Get "js/batch-callback.js") }}
+        {{ end }}
+      {{ end }}
+
+      {{ template "headlessui-component" (dict "component" "dialog" "bundle" $bundle ) }}
+
+      {{ $t := debug.Timer "bundle.Build" }}
+      {{ range $bundle.Build }}
+        <script src="{{ .RelPermalink }}" type="module"></script>
+      {{ end }}
+      {{ $t.Stop }}
     </div>
-  </article>
+  </div>
+{{ end }}
+
+{{ define "headlessui-component" }}
+  {{ $bundle := $.bundle }}
+
+  {{ $path := (printf "js/headlessui/%s.jsx" $.component) }}
+  {{ $id := $path | md5 }}
+  {{ $component := resources.Get $path }}
+  {{ with $bundle.UseScriptMany "reactbatch" }}
+    {{ $path := (printf "js/headlessui/%s.jsx" $.component) }}
+    {{ $id := $path | md5 }}
+    {{ with .UseItem $id }}
+      {{ if not .GetResource }}
+        {{ $component := resources.Get $path }}
+        {{ .SetResource $component }}
+      {{ end }}
+      {{ .AddInstance "i1" (dict "params" (dict "title" "Instance 1") ) }}
+    {{ end }}
+  {{ end }}
+
+
+  <div id="{{ printf `%s-%s` $id `i1` }}" class="relative m-4"></div>
 {{ end }}

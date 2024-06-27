@@ -1,0 +1,35 @@
+{{ $bundle := dict }}
+{{ with $bundle.UseScriptOne "main1" }}
+  {{ if not .GetResource }}
+    {{ .SetResource (resources.Get "js/main1.js") }}
+  {{ end }}
+  {{ .SetInstance (dict "title" "Main1 Instance") }}
+{{ end }}
+{{ with $bundle.UseScriptOne "main2" }}
+  {{ if not .GetResource }}
+    {{ .SetResource (resources.Get "js/main2.js") }}
+  {{ end }}
+  {{ .SetInstance (dict "title" "Main2 Instance") }}
+{{ end }}
+{{ with $bundle.UseScriptMany "reactbatch" }}
+  {{ if not .GetCallback }}
+    {{ .SetCallback (resources.Get "js/reactcallback.js") }}
+  {{ end }}
+  {{ with .UseItem "r1" }}
+    {{ if not .GetResource }}
+      {{ .SetResource (resources.Get "js/react1.jsx") }}
+    {{ end }}
+    {{ .AddInstance "i1" (dict "title" "Instance 1") }}
+    {{ .AddInstance "i2" (dict "title" "Instance 2") }}
+  {{ end }}
+  {{ with .UseItem "r2" }}
+    {{ if not .GetResource }}
+      {{ .SetResource (resources.Get "js/react2.jsx") }}
+    {{ end }}
+    {{ .AddInstance "i1" (dict "title" "Instance 2-1") }}
+  {{ end }}
+{{ end }}
+{{ range $k, $v := $bundle.Build }}
+  {{ $k }}:
+  {{ .RelPermalink }}
+{{ end }}

@@ -1,0 +1,19 @@
+{{ $params := .Params }}
+{{ $path := $params.path }}
+{{ $sourceID := $path | md5 }}
+{{ $instanceID := printf "jsx-%d" .Ordinal }}
+
+{{ $bundle := (js.Bundle "mybundle" .Page.Store) }}
+
+{{ with $bundle.UseScriptMany "reactbatch" }}
+  {{ with .UseItem $sourceID }}
+    {{ if not .GetResource }}
+      {{ .SetResource (resources.Get $path) }}
+    {{ end }}
+    {{ .AddInstance $instanceID  (dict "params" $params ) }}
+  {{ end }}
+{{ end }}
+
+{{/* This is a convention in this project. */}}
+{{ $elID := printf "%s-%s"  $sourceID $instanceID }}
+<div id="{{ $elID }}" class="relative m-4"></div>
